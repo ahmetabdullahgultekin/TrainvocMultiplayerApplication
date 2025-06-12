@@ -1,0 +1,39 @@
+package com.rollingcatsoftware.trainvocmultiplayerapplication.model;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@Entity
+@Table(name = "game_room")
+public class GameRoom {
+    @Id
+    @Column(length = 32)
+    private String roomCode;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Player> players = new ArrayList<>();
+
+    @Column
+    private int currentQuestionIndex;
+
+    @Column
+    private boolean started;
+
+    @Column
+    private String hostId;
+
+    @Column
+    private int questionDuration = 60;
+    @Column
+    private int optionCount = 4;
+    @Column
+    private String level = "A1";
+    @Column
+    private int totalQuestionCount = 5;
+}

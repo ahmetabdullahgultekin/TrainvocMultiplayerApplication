@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -19,7 +20,14 @@ public class LeaderboardController {
     }
 
     @GetMapping
-    public List<Player> getLeaderboard(@RequestParam String roomCode) {
-        return leaderboardService.getLeaderboardByRoom(roomCode);
+    public Object getLeaderboard(@RequestParam(required = false) String roomCode) {
+        if (roomCode == null || roomCode.isEmpty()) {
+            return Collections.singletonMap("error", "Missing or empty parameter: roomCode");
+        }
+        List<Player> leaderboard = leaderboardService.getLeaderboardByRoom(roomCode);
+        if (leaderboard == null || leaderboard.isEmpty()) {
+            return Collections.singletonMap("error", "No leaderboard found for the given room code.");
+        }
+        return leaderboard;
     }
 }

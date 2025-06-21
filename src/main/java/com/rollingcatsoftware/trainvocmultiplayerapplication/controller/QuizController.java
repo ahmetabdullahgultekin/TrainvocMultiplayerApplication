@@ -17,7 +17,21 @@ public class QuizController {
     }
 
     @GetMapping("/question")
-    public QuizQuestion getQuestion(@RequestParam String level, @RequestParam int optionCount) {
-        return quizService.generateQuestion(level, optionCount);
+    public Object getQuestion(@RequestParam(required = false) String level, @RequestParam(required = false) Integer optionCount) {
+        if (level == null || level.isEmpty()) {
+            return java.util.Collections.singletonMap("error", "Missing or empty parameter: level");
+        }
+        if (optionCount == null || optionCount <= 0) {
+            return java.util.Collections.singletonMap("error", "Missing or invalid parameter: optionCount");
+        }
+        try {
+            QuizQuestion question = quizService.generateQuestion(level, optionCount);
+            if (question == null) {
+                return java.util.Collections.singletonMap("error", "No question found for the given parameters.");
+            }
+            return question;
+        } catch (RuntimeException ex) {
+            return java.util.Collections.singletonMap("error", ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred while generating the question.");
+        }
     }
 }

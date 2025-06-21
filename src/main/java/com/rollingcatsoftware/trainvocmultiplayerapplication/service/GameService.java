@@ -8,6 +8,7 @@ import com.rollingcatsoftware.trainvocmultiplayerapplication.repository.PlayerRe
 import com.rollingcatsoftware.trainvocmultiplayerapplication.repository.QuestionRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -70,5 +71,9 @@ public class GameService {
 
     public void saveRoom(GameRoom room) {
         gameRoomRepo.save(room);
+    }
+
+    public List<GameRoom> getAllRooms() {
+        return gameRoomRepo.findAll();
     }
 }

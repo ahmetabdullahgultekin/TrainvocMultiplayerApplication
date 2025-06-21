@@ -7,6 +7,8 @@ import com.rollingcatsoftware.trainvocmultiplayerapplication.service.GameService
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/game")
 @CrossOrigin(origins = "*")
@@ -28,12 +30,15 @@ public class GameController {
         return ResponseEntity.ok(room);
     }
 
-    // Odaya katıl
+    // Join a room
     @PostMapping("/join")
-    public ResponseEntity<Player> joinRoom(@RequestParam String roomCode, @RequestParam String playerName) {
+    public ResponseEntity<?> joinRoom(@RequestParam String roomCode, @RequestParam String playerName) {
         Player player = gameService.joinRoom(roomCode, playerName);
         if (player == null) {
-            return ResponseEntity.badRequest().build();
+            // Return a more descriptive error message
+            return ResponseEntity.badRequest().body(
+                java.util.Collections.singletonMap("error", "Room not found or player could not be added. Please check the room code and player name.")
+            );
         }
         return ResponseEntity.ok(player);
     }
@@ -45,5 +50,10 @@ public class GameController {
         if (room == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(room);
     }
-}
 
+    // List all rooms
+    @GetMapping("/rooms")
+    public List<GameRoom> getAllRooms() {
+        return gameService.getAllRooms();
+    }
+}

@@ -19,17 +19,35 @@ public class WordController {
     }
 
     @GetMapping
-    public List<Word> getAllWords() {
-        return wordRepository.findAll();
+    public Object getAllWords() {
+        List<Word> words = wordRepository.findAll();
+        if (words == null || words.isEmpty()) {
+            return java.util.Collections.singletonMap("error", "No words found.");
+        }
+        return words;
     }
 
     @GetMapping("/by-level")
-    public List<Word> getWordsByLevel(@RequestParam String level) {
-        return wordRepository.findByLevel(level);
+    public Object getWordsByLevel(@RequestParam(required = false) String level) {
+        if (level == null || level.isEmpty()) {
+            return java.util.Collections.singletonMap("error", "Missing or empty parameter: level");
+        }
+        List<Word> words = wordRepository.findByLevel(level);
+        if (words == null || words.isEmpty()) {
+            return java.util.Collections.singletonMap("error", "No words found for the given level.");
+        }
+        return words;
     }
 
     @GetMapping("/by-exam")
-    public List<Word> getWordsByExam(@RequestParam String exam) {
-        return wordRepository.findByExam(exam);
+    public Object getWordsByExam(@RequestParam(required = false) String exam) {
+        if (exam == null || exam.isEmpty()) {
+            return java.util.Collections.singletonMap("error", "Missing or empty parameter: exam");
+        }
+        List<Word> words = wordRepository.findByExam(exam);
+        if (words == null || words.isEmpty()) {
+            return java.util.Collections.singletonMap("error", "No words found for the given exam.");
+        }
+        return words;
     }
 }

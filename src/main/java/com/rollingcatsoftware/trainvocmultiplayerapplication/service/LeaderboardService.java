@@ -23,6 +23,9 @@ public class LeaderboardService {
     }
 
     public List<Player> getSortedPlayers(GameRoom room) {
+        if (room.getPlayers() == null) {
+            return java.util.Collections.emptyList();
+        }
         return room.getPlayers().stream()
                 .sorted(Comparator.comparingInt(Player::getScore).reversed())
                 .collect(Collectors.toList());

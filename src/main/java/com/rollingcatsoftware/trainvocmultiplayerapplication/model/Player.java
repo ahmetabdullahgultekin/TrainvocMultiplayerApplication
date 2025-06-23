@@ -35,6 +35,9 @@ public class Player {
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlayerAnswer> answers = new ArrayList<>();
 
+    @Column
+    private Integer avatarId; // int olarak değiştirildi, index olarak tutulacak
+
     public Player() {
     }
 }

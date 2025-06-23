@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,4 +37,9 @@ public class GameRoom {
     private String level = "A1";
     @Column
     private int totalQuestionCount = 5;
+    @Column
+    private LocalDateTime lastUsed;
+
+    @Column(length = 128)
+    private String hashedPassword;
 }

@@ -45,6 +45,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
         switch (type) {
             case "create" -> {
                 String hostName = json.getString("name");
+                Integer avatarId = json.has("avatarId") && !json.isNull("avatarId") ? json.getInt("avatarId") : null;
+                String hashedPassword = json.has("hashedPassword") && !json.isNull("hashedPassword") ? json.getString("hashedPassword") : null;
                 JSONObject settingsJson = json.has("settings") ? json.getJSONObject("settings") : new JSONObject();
                 QuizSettings settings = new QuizSettings();
                 settings.setQuestionDuration(settingsJson.optInt("questionDuration", 60));
@@ -52,7 +54,7 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
                 settings.setLevel(settingsJson.optString("level", "A1"));
                 settings.setTotalQuestionCount(settingsJson.optInt("totalQuestionCount", 5));
                 boolean hostWantsToJoin = settingsJson.has("hostWantsToJoin") ? settingsJson.getBoolean("hostWantsToJoin") : true;
-                GameRoom room = gameService.createRoom(hostName, settings, hostWantsToJoin);
+                GameRoom room = gameService.createRoom(hostName, avatarId, settings, hostWantsToJoin, hashedPassword);
                 Player host = null;
                 if (hostWantsToJoin && !room.getPlayers().isEmpty()) {
                     host = room.getPlayers().getFirst();
@@ -67,7 +69,8 @@ public class GameWebSocketHandler extends TextWebSocketHandler {
             case "join" -> {
                 String roomCode = json.getString("roomCode");
                 String name = json.getString("name");
-                Player player = gameService.joinRoom(roomCode, name);
+                Integer avatarId = json.has("avatarId") && !json.isNull("avatarId") ? json.getInt("avatarId") : null;
+                Player player = gameService.joinRoom(roomCode, name, avatarId);
                 playerSessions.put(player.getId(), session);
 
                 JSONObject response = new JSONObject();

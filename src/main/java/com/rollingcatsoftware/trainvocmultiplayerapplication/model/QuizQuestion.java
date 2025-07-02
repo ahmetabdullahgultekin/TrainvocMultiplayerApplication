@@ -13,5 +13,30 @@ public class QuizQuestion {
         this.options = options;
     }
 
-    // getter ve setter'lar
+    public QuizQuestion() {
+    }
+
+    public String getEnglish() {
+        return english;
+    }
+
+    public void setEnglish(String english) {
+        this.english = english;
+    }
+
+    public String getCorrectMeaning() {
+        return correctMeaning;
+    }
+
+    public void setCorrectMeaning(String correctMeaning) {
+        this.correctMeaning = correctMeaning;
+    }
+
+    public List<String> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<String> options) {
+        this.options = options;
+    }
 }

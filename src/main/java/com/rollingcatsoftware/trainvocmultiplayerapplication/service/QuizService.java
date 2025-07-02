@@ -29,4 +29,12 @@ public class QuizService {
 
         return new QuizQuestion(questionWord.getWord(), questionWord.getMeaning(), options);
     }
+
+    public List<QuizQuestion> generateQuestions(String level, int optionCount, int totalQuestionCount) {
+        List<QuizQuestion> questions = new ArrayList<>();
+        for (int i = 0; i < totalQuestionCount; i++) {
+            questions.add(generateQuestion(level, optionCount));
+        }
+        return questions;
+    }
 }

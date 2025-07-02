@@ -161,4 +161,10 @@ public class GameService {
         if (!timingSafeEquals(roomHash, hashedPassword))
             throw new RoomPasswordException("InvalidRoomPassword", "Şifre yanlış.");
     }
+
+    public List<Player> getPlayersByRoomCode(String roomCode) {
+        GameRoom room = gameRoomRepo.findByRoomCode(roomCode);
+        if (room == null) return null;
+        return playerRepo.findByRoom(room);
+    }
 }

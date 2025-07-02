@@ -13,7 +13,7 @@ public class CorsConfig implements WebMvcConfigurer {
                         "https://trainvoc.rollingcatsoftware.com",
                         "https://api.trainvoc.rollingcatsoftware.com",
                         "https://api.trainvoc.rollingcatsoftware.com:8443",
-                        "http://localhost:3000" // Local development
+                        "http://localhost:5173" // Local development
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

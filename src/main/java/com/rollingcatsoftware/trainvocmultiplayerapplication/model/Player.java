@@ -38,6 +38,9 @@ public class Player {
     @Column
     private Integer avatarId; // int olarak değiştirildi, index olarak tutulacak
 
+    @Column
+    private Integer currentAnsweredQuestionIndex = null; // Oyuncunun en son hangi soruya cevap verdiği
+
     public Player() {
     }
 }

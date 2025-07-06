@@ -24,7 +24,7 @@ public class GameRoom {
     private int currentQuestionIndex;
 
     @Column
-    private boolean started;
+    private Boolean started = false;
 
     @Column
     private String hostId;
@@ -42,4 +42,12 @@ public class GameRoom {
 
     @Column(length = 128)
     private String hashedPassword;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column
+    private GameState currentState = GameState.LOBBY; // Oyun state'i: lobby, countdown, question, ranking, vb.
+
+    @Column
+    private LocalDateTime stateStartTime; // O anki state'in başlangıç zamanı
 }
+

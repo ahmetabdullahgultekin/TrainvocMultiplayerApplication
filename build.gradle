@@ -40,3 +40,11 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+tasks.register('killPort', Exec) {
+    commandLine 'cmd', '/c', 'kill-port.bat'
+}
+
+tasks.named('bootRun') {
+    dependsOn tasks.named('killPort')
+}

@@ -1,7 +1,12 @@
 package com.rollingcatsoftware.trainvocmultiplayerapplication.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Setter
+@Getter
 public class QuizQuestion {
     private String english;
     private String correctMeaning;
@@ -13,30 +18,4 @@ public class QuizQuestion {
         this.options = options;
     }
 
-    public QuizQuestion() {
-    }
-
-    public String getEnglish() {
-        return english;
-    }
-
-    public void setEnglish(String english) {
-        this.english = english;
-    }
-
-    public String getCorrectMeaning() {
-        return correctMeaning;
-    }
-
-    public void setCorrectMeaning(String correctMeaning) {
-        this.correctMeaning = correctMeaning;
-    }
-
-    public List<String> getOptions() {
-        return options;
-    }
-
-    public void setOptions(List<String> options) {
-        this.options = options;
-    }
 }

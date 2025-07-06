@@ -137,28 +137,86 @@ public class GameController {
         if (room == null) {
             return ResponseEntity.status(404).body(java.util.Collections.singletonMap("error", "Oda bulunamadı."));
         }
+        // Sadece QUESTION state'inde cevap kabul et
+        if (room.getCurrentState() != com.rollingcatsoftware.trainvocmultiplayerapplication.model.GameState.QUESTION) {
+            return ResponseEntity.status(403).body(java.util.Collections.singletonMap("error", "Şu anda cevap gönderilemez. Sadece soru aşamasında cevap verilebilir."));
+        }
         List<Player> players = room.getPlayers();
         Player player = players.stream()
                 .filter(p -> p.getId().equals(answerRequest.getPlayerId()))
                 .findFirst().orElse(null);
-        System.out.println("[DEBUG] Bulunan Player: " + (player != null ? player.getName() : "null"));
         if (player == null) {
             return ResponseEntity.status(404).body(java.util.Collections.singletonMap("error", "Oyuncu bulunamadı."));
         }
+        // Oyuncu bu soruya zaten cevap verdiyse tekrar cevap vermesini engelle
+        if (player.getCurrentAnsweredQuestionIndex() != null && player.getCurrentAnsweredQuestionIndex() == room.getCurrentQuestionIndex()) {
+            return ResponseEntity.status(403).body(java.util.Collections.singletonMap("error", "Bu soruya zaten cevap verdiniz."));
+        }
         // Skoru backend'de hesapla (oda ayarlarından maxTime alınır)
         int maxTime = room.getQuestionDuration();
-        System.out.println("[SCORE] isCorrect: " + answerRequest.isCorrect() + ", answerTime: " + answerRequest.getAnswerTime() + ", optionPickRate: " + answerRequest.getOptionPickRate() + ", maxTime: " + maxTime);
         int calculatedScore = AnswerRequest.calculateScore(
                 answerRequest.isCorrect(),
                 answerRequest.getAnswerTime(),
                 answerRequest.getOptionPickRate(),
                 maxTime
         );
-        System.out.println("[SCORE] Calculated score: " + calculatedScore);
         player.setScore(player.getScore() + calculatedScore);
+        player.setTotalAnswerTime(answerRequest.getAnswerTime());
+        player.setCurrentAnsweredQuestionIndex(room.getCurrentQuestionIndex()); // Cevap verdi olarak işaretle
         playerRepo.save(player);
+        // Tüm oyuncular cevapladıysa state'i ANSWER_REVEAL yap
+        boolean allAnswered = players.stream().allMatch(p -> p.getCurrentAnsweredQuestionIndex() != null && p.getCurrentAnsweredQuestionIndex() == room.getCurrentQuestionIndex());
+        if (allAnswered) {
+            room.setCurrentState(com.rollingcatsoftware.trainvocmultiplayerapplication.model.GameState.ANSWER_REVEAL);
+            room.setStateStartTime(java.time.LocalDateTime.now());
+            gameService.saveRoom(room);
+        }
         // Güncel oyuncu listesini veritabanından çekerek dön
         List<Player> updatedPlayers = playerRepo.findByRoom(room);
         return ResponseEntity.ok(java.util.Collections.singletonMap("players", updatedPlayers));
+    }
+
+    // Oyun state ve kalan süre endpointi
+    @GetMapping("/state")
+    public ResponseEntity<?> getGameState(@RequestParam String roomCode, @RequestParam String playerId) {
+        var stateInfo = gameService.getGameState(roomCode, playerId);
+        if (stateInfo == null) {
+            return ResponseEntity.status(404).body(java.util.Collections.singletonMap("error", "Oda veya oyuncu bulunamadı."));
+        }
+        return ResponseEntity.ok(stateInfo);
+    }
+
+    // Sadece state ve süre döndüren sade endpoint
+    @GetMapping("/state-simple")
+    public ResponseEntity<?> getSimpleState(@RequestParam String roomCode, @RequestParam String playerId) {
+        var stateInfo = gameService.getSimpleState(roomCode, playerId);
+        if (stateInfo == null) {
+            return ResponseEntity.status(404).body(java.util.Collections.singletonMap("error", "Oda veya oyuncu bulunamadı."));
+        }
+        return ResponseEntity.ok(stateInfo);
+    }
+
+    // Sonraki soruya geçiş endpointi
+    @PostMapping("/next")
+    public ResponseEntity<?> nextQuestion(@RequestParam String roomCode, @RequestParam(required = false) String hashedPassword) {
+        GameRoom room = gameService.getRoom(roomCode);
+        if (room == null) {
+            return ResponseEntity.status(404).body(java.util.Collections.singletonMap("error", "Oda bulunamadı."));
+        }
+        // Eğer şifreli oda ise kontrol et
+        if (!gameService.checkRoomPassword(roomCode, hashedPassword)) {
+            return ResponseEntity.status(403).body(java.util.Collections.singletonMap("error", "Room password is incorrect."));
+        }
+        // Sadece ANSWER_REVEAL veya benzeri state'te sonraki soruya geçilebilir
+        if (room.getCurrentState() != com.rollingcatsoftware.trainvocmultiplayerapplication.model.GameState.ANSWER_REVEAL) {
+            return ResponseEntity.status(403).body(java.util.Collections.singletonMap("error", "Şu anda sonraki soruya geçilemez. Tüm oyuncular cevaplamalı ve cevaplar açıklanıyor olmalı."));
+        }
+        boolean advanced = gameService.goToNextQuestion(room);
+        if (!advanced) {
+            return ResponseEntity.status(400).body(java.util.Collections.singletonMap("error", "Sonraki soruya geçilemedi. Oyun bitmiş olabilir veya başka bir hata oluştu."));
+        }
+        // Oda state'ini güncel olarak döndür
+        var stateInfo = gameService.getGameState(roomCode, null);
+        return ResponseEntity.ok(stateInfo);
     }
 }
